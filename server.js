@@ -88,11 +88,11 @@ app.post('/api/create', (req, res) => {
 app.get('/api/GetStationInfo', (req, res) => {
 
   
-  // const num = req.body.userid
+  const num = req.query.userid
+  console.log("num" + num)
   
-  // const value = [num]
-  // const sql = `SELECT user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.userID = ?`;
-  const sql = 'SELECT * FROM user_charge_info';
+  const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
+  // const sql = 'SELECT * FROM user_charge_info';
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
