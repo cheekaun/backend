@@ -107,6 +107,29 @@ app.get('/api/GetStationInfo', (req, res) => {
   });
 });
 
+app.get('/api/GetAllStation', (req, res) => {
+
+  
+  const num = req.query.userid
+  console.log("num" + num)
+  
+  const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
+  // const sql = 'SELECT * FROM user_charge_info';
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
+
 // start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
