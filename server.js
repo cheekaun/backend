@@ -110,11 +110,11 @@ app.get('/api/GetStationInfo', (req, res) => {
 app.get('/api/GetAllStation', (req, res) => {
 
   
-  const num = req.query.userid
-  console.log("num" + num)
+  // const num = req.query.userid
+  // console.log("num" + num)
   
-  const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
-  // const sql = 'SELECT * FROM user_charge_info';
+  // const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
+  const sql = `SELECT user_station.id, user_station.stationName FROM user_station WHERE user_station.userID =  "3"`
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
