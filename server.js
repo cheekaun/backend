@@ -88,11 +88,12 @@ app.post('/api/create', (req, res) => {
 app.get('/api/GetStationInfo', (req, res) => {
 
   
-  const num = req.query.userid
-  console.log("num" + num)
+  const userid = req.query.userid
+  const stationID = req.query.stationID
+  console.log("userid" + userid)
+  console.log("stationID" + stationID)
   
-  const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
-  // const sql = 'SELECT * FROM user_charge_info';
+  const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info  WHERE user_charge_info.userID = "${userid}" AND user_charge_info.StationID = "${stationID}"`
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
@@ -110,11 +111,37 @@ app.get('/api/GetStationInfo', (req, res) => {
 app.get('/api/GetAllStation', (req, res) => {
 
   
+  const userid = req.query.userid
+  console.log("userid" + userid)
+  
+  // const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
+  const sql = `SELECT user_station.id, user_station.stationName FROM user_station WHERE user_station.userID =  "${userid}"`
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
+app.get('/api/ChooseStation', (req, res) => {
+
+  
   // const num = req.query.userid
   // console.log("num" + num)
   
   // const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
-  const sql = `SELECT user_station.id, user_station.stationName FROM user_station WHERE user_station.userID =  "3"`
+
+  const userid = req.query.userid
+
+  
+  const sql = `SELECT user_station.id, user_station.stationName FROM user_station WHERE user_station.userID =  "3" AND `
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
