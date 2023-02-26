@@ -65,26 +65,6 @@ app.post('/api/create', (req, res) => {
   })
 })
 
-// app.get('/api/GetStationInfo', (req, res) => {
-//   // const sql = "SELECT ChargeTypePicture, ChargeTypeName FROM `user_charge_info`,`user` WHERE `user_charge_info`.`userID` = `user`.`id`"
-//   const userid = req.body.userid
-//   const value = [userid]
-//   const sql = `SELECT ChargeTypePicture, ChargeTypeName FROM user_charge_info,user WHERE user_charge_info.userID = user.id AND user_charge_info.userID = ?`;
-
-//   connection.query(sql, value, (error, results) => {
-//     if (error) {
-//       console.log('Error fetching data: ', error);
-//       res.status(500).json({
-//         error: error
-//       });
-//     } else {
-//       res.json({
-//         results
-//       });
-//     }
-//   });
-// });
-
 app.get('/api/GetStationInfo', (req, res) => {
 
   
@@ -110,7 +90,6 @@ app.get('/api/GetStationInfo', (req, res) => {
 
 app.get('/api/GetAllStation', (req, res) => {
 
-  
   const userid = req.query.userid
   console.log("userid" + userid)
   
@@ -132,16 +111,21 @@ app.get('/api/GetAllStation', (req, res) => {
 
 app.get('/api/ChooseStation', (req, res) => {
 
-  
-  // const num = req.query.userid
-  // console.log("num" + num)
-  
-  // const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
-
   const userid = req.query.userid
-
+  const stationID = req.query.stationID
+  console.log("userid" + userid)
+  console.log("stationID" + stationID)
+  sql = ""
   
-  const sql = `SELECT user_station.id, user_station.stationName FROM user_station WHERE user_station.userID =  "3" AND `
+  if(stationID ===""){
+    console.log("case 1")
+    sql = `SELECT user_history.id, user_history.name , user_history.ChargeTP, user_history.ChargeTN , user_history.Cmodel , user_history.kWh , user_history.price , user_history.date FROM user_history WHERE user_history.userID =  ${userid}`
+  }else{
+    console.log("case 2")
+    sql = `SELECT user_history.id, user_history.name , user_history.ChargeTP, user_history.ChargeTN , user_history.Cmodel , user_history.kWh , user_history.price , user_history.date FROM user_history WHERE user_history.userID =  ${userid} AND user_history.stationID = ${stationID}`
+  }
+  
+  
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
