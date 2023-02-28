@@ -140,6 +140,37 @@ app.get('/api/ChooseStation', (req, res) => {
   });
 });
 
+app.get('/api/ChooseStationReview', (req, res) => {
+
+  const userid = req.query.userid
+  const stationID = req.query.stationID
+  console.log("userid" + userid)
+  console.log("stationID" + stationID)
+  sql = ""
+  
+  if(stationID ===""){
+    console.log("case 1")
+    sql = `SELECT station_review.id, station_review.reviewer_name , station_review.score, station_review.comment , station_review.date_time FROM station_review WHERE station_review.userID =  ${userid}`
+  }else{
+    console.log("case 2")
+    sql = `SELECT station_review.id, station_review.reviewer_name , station_review.score, station_review.comment , station_review.date_time FROM station_review WHERE station_review.userID =  ${userid} AND station_review.stationID = ${stationID}`
+  }
+  
+  
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
 
 // start the server
 const PORT = process.env.PORT || 5000;
