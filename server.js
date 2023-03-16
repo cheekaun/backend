@@ -4,8 +4,18 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { query } = require('express');
 
+// const app = express();
 const app = express();
+app.disable('x-powered-by');
+
+// Middleware registration
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 app.use(cors());
+// app.use(cors({
+//   origin: 'http://localhost:3000'
+// }));
+
 app.use(bodyParser.json());
 
 const connection = mysql.createConnection({
@@ -14,6 +24,12 @@ const connection = mysql.createConnection({
   password: '',
   port:'3307',
   database: 'test_db'
+  
+  // host: '000webhost.com',
+  // user: 'id19597049_se_root',
+  // password: '@Password1234',
+  // database: 'id19597049_se_database'
+  // Test Database from 000Webhost (Not work)
 });
 
 connection.connect(error => {
@@ -25,6 +41,7 @@ connection.connect(error => {
 });
 
 app.get('/api/data', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   const sql = 'SELECT * FROM user';
 
   connection.query(sql, (error, results) => {
@@ -42,6 +59,7 @@ app.get('/api/data', (req, res) => {
 });
 
 app.post('/api/create', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
   const username = req.body.username
   const lastname = req.body.lastname
   const email = req.body.email
@@ -66,7 +84,7 @@ app.post('/api/create', (req, res) => {
 })
 
 app.get('/api/GetStationInfo', (req, res) => {
-
+  res.set('Access-Control-Allow-Origin', '*');
   
   const userid = req.query.userid
   const stationID = req.query.stationID
@@ -89,11 +107,10 @@ app.get('/api/GetStationInfo', (req, res) => {
 });
 
 app.get('/api/GetAllStation', (req, res) => {
-
+  res.set('Access-Control-Allow-Origin', '*');
   const userid = req.query.userid
   console.log("userid" + userid)
-  
-  // const sql = `SELECT user_charge_info.id, user_charge_info.ChargeTypePicture, user_charge_info.ChargeTypeName FROM user_charge_info , user WHERE user_charge_info.userID = user.id AND user_charge_info.StationID = "${num}"`
+
   const sql = `SELECT user_station.id, user_station.stationName FROM user_station WHERE user_station.userID =  "${userid}"`
   connection.query(sql,(error, results) => {
     if (error) {
@@ -110,7 +127,7 @@ app.get('/api/GetAllStation', (req, res) => {
 });
 
 app.get('/api/ChooseStation', (req, res) => {
-
+  
   const userid = req.query.userid
   const stationID = req.query.stationID
   console.log("userid" + userid)
@@ -141,7 +158,7 @@ app.get('/api/ChooseStation', (req, res) => {
 });
 
 app.get('/api/ChooseStationReview', (req, res) => {
-
+  
   const userid = req.query.userid
   const stationID = req.query.stationID
   console.log("userid" + userid)
@@ -156,7 +173,7 @@ app.get('/api/ChooseStationReview', (req, res) => {
     sql = `SELECT station_review.id, station_review.reviewer_name , station_review.score, station_review.comment , station_review.date_time FROM station_review WHERE station_review.userID =  ${userid} AND station_review.stationID = ${stationID}`
   }
   
-  
+  res.set('Access-Control-Allow-Origin', '*');
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
@@ -170,6 +187,116 @@ app.get('/api/ChooseStationReview', (req, res) => {
     }
   });
 });
+
+app.get('/api/GetAllYear', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  const userid = req.query.userid
+  console.log("Allyear userid" + userid)
+
+  //// http://localhost:5000/api/GetAllYear?userid=3
+  const sql = `SELECT id ,Year FROM graph_info_test WHERE userID = "${userid}" GROUP BY Year ORDER BY id`
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
+app.get('/api/GetAllMonth', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  const userid = req.query.userid
+  console.log("All Month userid" + userid)
+  
+  //// http://localhost:5000/api/GetAllMonth?userid=3
+  const sql = `SELECT id ,Month FROM graph_info_test WHERE userID = "${userid}" GROUP BY Month ORDER BY id`
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
+
+app.get('/api/MakeGraph', (req, res) => {
+  res.set('Access-Control-Allow-Origin', '*');
+  const userid = req.query.userid
+  const stationID = req.query.stationID
+  const Year = "2000"
+  const Month = "มกราคม"
+  console.log("userid" + userid)
+  console.log("stationID" + stationID)
+  sql = ""
+  sql = `SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income FROM graph_info_test WHERE userID = 3`
+  sql = `SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income FROM graph_info_test WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "${Month}" GROUP BY Day ORDER BY id`
+  
+  // if(stationID ==="" && userid === "3"){
+  //   console.log("test1")
+  //   sql = ``
+  // }else if(stationID ==="4" && userid === "3"){
+  //   console.log("กรณีเลือกสถานี แต่ ไม่ได้เลือก ปี เดือน")
+  //   sql = `SELECT Year , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = ${userid} AND StationID = ${stationID} GROUP BY Year`
+  // }else{
+
+  // }
+
+  if(stationID){
+
+  }
+  
+  ///// SELECT id , Income , Year , Month , Day as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "มกราคม"  API สุดท้าย
+  //// SELECT id , Income , Year , Month , Day , SUM(Income) as S_Income FROM `graph_info` WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "มกราคม" เอา Income รวม
+
+  // SELECT Year , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = 3  GROUP BY Year ORDER BY id;  ไม่เลือกอะไรเลย
+  // SELECT Year , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 GROUP BY Year ORDER BY id;   เลือกแต่สถานี
+  // SELECT Year, Month , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 AND Year = 2000 GROUP BY Month ORDER BY id เลือกสถานี เลือกปี
+  // SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "มกราคม" GROUP BY Day ORDER BY id เลือกสถานี เลือกปี เลือกเดือน
+
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+    // connection.end();
+  });
+});
+
+
+app.get('/api/att', (req, res) => {
+  sql = `SELECT * from attractions`
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
 
 
 // start the server
