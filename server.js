@@ -235,28 +235,42 @@ app.get('/api/MakeGraph', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   const userid = req.query.userid
   const stationID = req.query.stationID
-  const Year = "2000"
-  const Month = "มกราคม"
+  const Year = req.query.Year
+  const Month = req.query.Month
+
   console.log("userid" + userid)
   console.log("stationID" + stationID)
   sql = ""
-  sql = `SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income FROM graph_info_test WHERE userID = 3`
-  sql = `SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income FROM graph_info_test WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "${Month}" GROUP BY Day ORDER BY id`
+  sql = `SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income , SUM(Usetime) as usetime FROM graph_info WHERE userID = "${userid}"`
+  // sql = `SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income FROM graph_info_test WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "${Month}" GROUP BY Day ORDER BY id`
   
-  // if(stationID ==="" && userid === "3"){
-  //   console.log("test1")
-  //   sql = ``
-  // }else if(stationID ==="4" && userid === "3"){
-  //   console.log("กรณีเลือกสถานี แต่ ไม่ได้เลือก ปี เดือน")
-  //   sql = `SELECT Year , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = ${userid} AND StationID = ${stationID} GROUP BY Year`
-  // }else{
 
-  // }
-
-  if(stationID){
-
+  if(stationID !== ""){
+    sql += ` AND StationID = ${stationID}`
   }
   
+  if(Year !== ""){
+    sql += ` AND Year = ${Year}`
+  } 
+
+  if(Month !== ""){
+    sql += ` AND Month = "${Month}"`
+  }
+
+  if(Month !== ""){
+    sql += ` GROUP BY Day ORDER BY id`
+  }
+  else if(Year !== ""){
+    sql += ` GROUP BY Month ORDER BY id`
+  } 
+  else if(stationID !== ""){
+    sql += ` GROUP BY Year ORDER BY id`
+  }
+  else{
+    sql += ` GROUP BY Year ORDER BY id`
+  }
+
+  console.log(sql)
   ///// SELECT id , Income , Year , Month , Day as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "มกราคม"  API สุดท้าย
   //// SELECT id , Income , Year , Month , Day , SUM(Income) as S_Income FROM `graph_info` WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "มกราคม" เอา Income รวม
 
@@ -264,7 +278,7 @@ app.get('/api/MakeGraph', (req, res) => {
   // SELECT Year , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 GROUP BY Year ORDER BY id;   เลือกแต่สถานี
   // SELECT Year, Month , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 AND Year = 2000 GROUP BY Month ORDER BY id เลือกสถานี เลือกปี
   // SELECT Year, Month , Day , ROUND(SUM(Income),2) as S_Income FROM graph_info WHERE userID = 3 AND StationID = 4 AND Year = 2000 AND Month = "มกราคม" GROUP BY Day ORDER BY id เลือกสถานี เลือกปี เลือกเดือน
-
+  
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
@@ -280,6 +294,32 @@ app.get('/api/MakeGraph', (req, res) => {
   });
 });
 
+app.get('/api/test_image', (req, res) => {
+  sql = `SELECT id, image_name , image from test_image `
+
+  connection.query(sql,(error, results) => {
+
+    const image = results[0].image;
+    console.log(image)
+    
+
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.writeHead(200, {
+          'Content-Type': 'image/jpeg',
+          'Content-Length': image.length
+      });
+      res.end(image);
+      // res.json({
+      //   results
+      // });
+    }
+  });
+});
 
 app.get('/api/att', (req, res) => {
   sql = `SELECT * from attractions`
