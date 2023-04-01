@@ -24,6 +24,7 @@ const connection = mysql.createConnection({
   password: '',
   port:'3307',
   database: 'test_db'
+
   
   // host: '000webhost.com',
   // user: 'id19597049_se_root',
@@ -299,7 +300,7 @@ app.get('/api/test_image', (req, res) => {
 
   connection.query(sql,(error, results) => {
 
-    const image = results[0].image;
+    const image = results[4].image;
     console.log(image)
     
 
@@ -317,6 +318,35 @@ app.get('/api/test_image', (req, res) => {
       // res.json({
       //   results
       // });
+    }
+  });
+});
+
+app.get('/api/SumIncomeAndUser', (req, res) => {
+
+  // const userID = req.body.userID;
+  // const StationID = req.body.StationID;
+  const userID = req.query.userID;
+  const StationID = req.query.StationID;
+  console.log(userID)
+  console.log(StationID)
+  if(StationID===""){
+    sql = `SELECT ROUND(SUM(Income),2) as Sun_Income , SUM(Usetime) as Sum_user, COUNT(id) as count_day FROM graph_info WHERE userID = "${userID}"`
+  }else{
+    sql = `SELECT ROUND(SUM(Income),2) as Sun_Income , SUM(Usetime) as Sum_user, COUNT(id) as count_day FROM graph_info WHERE userID = "${userID}" AND StationID = "${StationID}"`
+  }
+  
+  
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
     }
   });
 });
