@@ -189,13 +189,47 @@ app.get('/api/ChooseStationReview', (req, res) => {
   });
 });
 
+
+app.get('/api/CountScoreAndReview', (req, res) => {
+  
+
+  const userid = req.query.userid
+  const stationID = req.query.stationID
+  console.log("userid" + userid)
+  console.log("stationID" + stationID)
+  sql = ""
+  
+  if(stationID ===""){
+    console.log("case 1")
+    sql = `SELECT station_review.id, station_review.reviewer_name , station_review.score, station_review.comment , station_review.date_time , ROUND(AVG(station_review.score),1) as AVG_S, COUNT(station_review.id) as COUNT_R FROM station_review WHERE station_review.userID =  ${userid}`
+  }else{
+    console.log("case 2")
+    sql = `SELECT station_review.id, station_review.reviewer_name , station_review.score, station_review.comment , station_review.date_time , ROUND(AVG(station_review.score),1) as AVG_S, COUNT(station_review.id) as COUNT_R FROM station_review WHERE station_review.userID =  ${userid} AND station_review.stationID = ${stationID}`
+  }
+  
+  res.set('Access-Control-Allow-Origin', '*');
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
+
 app.get('/api/GetAllYear', (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   const userid = req.query.userid
   console.log("Allyear userid" + userid)
 
   //// http://localhost:5000/api/GetAllYear?userid=3
-  const sql = `SELECT id ,Year FROM graph_info_test WHERE userID = "${userid}" GROUP BY Year ORDER BY id`
+  const sql = `SELECT id ,Year FROM graph_info WHERE userID = "${userid}" GROUP BY Year ORDER BY id`
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
@@ -216,7 +250,7 @@ app.get('/api/GetAllMonth', (req, res) => {
   console.log("All Month userid" + userid)
   
   //// http://localhost:5000/api/GetAllMonth?userid=3
-  const sql = `SELECT id ,Month FROM graph_info_test WHERE userID = "${userid}" GROUP BY Month ORDER BY id`
+  const sql = `SELECT id ,Month FROM graph_info WHERE userID = "${userid}" GROUP BY Month ORDER BY id`
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
@@ -328,12 +362,18 @@ app.get('/api/SumIncomeAndUser', (req, res) => {
   // const StationID = req.body.StationID;
   const userID = req.query.userID;
   const StationID = req.query.StationID;
+  const ChooseYear = req.query.ChooseYear;
+  console.log("SumIncomeAndUser running")
   console.log(userID)
   console.log(StationID)
-  if(StationID===""){
-    sql = `SELECT ROUND(SUM(Income),2) as Sun_Income , SUM(Usetime) as Sum_user, COUNT(id) as count_day FROM graph_info WHERE userID = "${userID}"`
-  }else{
-    sql = `SELECT ROUND(SUM(Income),2) as Sun_Income , SUM(Usetime) as Sum_user, COUNT(id) as count_day FROM graph_info WHERE userID = "${userID}" AND StationID = "${StationID}"`
+  console.log(ChooseYear)
+  sql = `SELECT ROUND(SUM(Income),2) as Sun_Income , SUM(Usetime) as Sum_user, COUNT(id) as count_day FROM graph_info WHERE userID = "${userID}"`
+  if(StationID!==""){
+    sql = sql + ` AND StationID = "${StationID}"`
+  }
+
+  if(ChooseYear!==""){
+    sql = sql + ` AND Year = "${ChooseYear}"`
   }
   
   
@@ -351,8 +391,9 @@ app.get('/api/SumIncomeAndUser', (req, res) => {
   });
 });
 
-app.get('/api/att', (req, res) => {
-  sql = `SELECT * from attractions`
+app.get('/api/GetUserInfo', (req, res) => {
+  const userID = req.query.userID;
+  sql = `SELECT * from user WHERE id = "${userID}"`
   connection.query(sql,(error, results) => {
     if (error) {
       console.log('Error fetching data: ', error);
