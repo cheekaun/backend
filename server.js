@@ -409,6 +409,27 @@ app.get('/api/GetUserInfo', (req, res) => {
 });
 
 
+app.get('/api/Auth', (req, res) => {
+  const email = req.query.email;
+  const password = req.query.password;
+  console.log(email)
+  console.log(password)
+  sql = `SELECT id from user WHERE email = "${email}" AND password = "${password}"`
+  connection.query(sql,(error, results) => {
+    if (error) {
+      console.log('Error fetching data: ', error);
+      res.status(500).json({
+        error: error
+      });
+    } else {
+      res.json({
+        results
+      });
+    }
+  });
+});
+
+
 
 // start the server
 const PORT = process.env.PORT || 5000;
